@@ -2,6 +2,7 @@
 using System . Collections ;
 using System . Collections . Generic ;
 using System . Diagnostics ;
+using System . Globalization ;
 using System . Linq ;
 using System . Net ;
 using System . Text ;
@@ -63,6 +64,7 @@ namespace WenceyWang . AntiPlaneWuBot
 			Console . Title = me . Username ;
 
 			BotClient . OnMessage += BotClient_OnMessage ;
+			BotClient . OnMessageEdited += BotClient_OnMessage ;
 
 			EmojiList = Emojis . EmojisList . Values .
 								Select ( emoji => new MarkedValue <string , int> ( emoji , 0 ) ) .
@@ -72,6 +74,7 @@ namespace WenceyWang . AntiPlaneWuBot
 
 			BotClient . StartReceiving ( ) ;
 		}
+
 
 		private void BotClient_OnMessage ( object sender , MessageEventArgs e )
 		{
@@ -93,7 +96,7 @@ namespace WenceyWang . AntiPlaneWuBot
 
 				int emojiLenth = 0 ;
 				int nonEmojiLenth = 0 ;
-
+				int spaceCount = 0 ;
 
 				while ( emojiLenth + nonEmojiLenth < lenth )
 				{
@@ -109,6 +112,11 @@ namespace WenceyWang . AntiPlaneWuBot
 					}
 					else
 					{
+						if ( char . GetUnicodeCategory ( text . First ( ) ) == UnicodeCategory . SpaceSeparator )
+						{
+							spaceCount++ ;
+						}
+
 						nonEmojiLenth++ ;
 						text = text . Substring ( 1 ) ;
 					}
@@ -143,8 +151,8 @@ namespace WenceyWang . AntiPlaneWuBot
 				else if ( e . Message . Chat . Type == ChatType . Group ||
 						e . Message . Chat . Type == ChatType . Supergroup )
 				{
-					if ( emojiLenth * 1.1 >= lenth &&
-						usedEmojiTypeCount >= 2 )
+					if ( usedEmojiTypeCount >= 2 ) //((emojiLenth * 2)+spaceCount) >= lenth &&
+
 					{
 						BotClient . DeleteMessageAsync ( message . Chat . Id , message . MessageId ) ;
 					}
